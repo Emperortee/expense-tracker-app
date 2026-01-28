@@ -1,6 +1,6 @@
 import { ResponseType, WalletType } from "@/types";
 import { uploadFileToCloudinary } from "./imageService";
-import { collection, deleteDoc, doc, setDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where, writeBatch } from "firebase/firestore";
 import { firestore } from "@/config/firebase";
 
 export const createOrUpdateWallet = async (
@@ -44,9 +44,51 @@ export const deleteWallet = async (walletId: string): Promise<ResponseType> => {
         const walletRef = doc(firestore, "wallets", walletId);
         await deleteDoc(walletRef);
 
-       // todo: delete all transactions related to this wallet
+       deleteTransactionByWalletId(walletId);
            
        return { success: true, msg: "waallet deleted successfully" };
+    } catch (err:any) {
+        console.log ('error deleting wallet: ', err);
+        return {success: false, msg: err.message}
+    }
+};
+export const deleteTransactionByWalletId = async (walletId: string): Promise<ResponseType> => {
+    try {
+        let hasMoreTransactions = true;
+
+
+        while(hasMoreTransactions){
+          const transactionsQuery = query(
+            collection(firestore, 'transactions'),
+            where('walleId', '==', walletId)
+          );
+
+          const transactionSnapshot = await getDocs(transactionsQuery)
+          if(transactionSnapshot.size == 0){
+            hasMoreTransactions = false;
+            break;
+          }
+
+        const batch = writeBatch(firestore);
+
+        transactionSnapshot.forEach((transactionDoc)=>{
+            batch.delete(transactionDoc.ref);
+        });
+
+        await batch.commit();
+
+        console.log(`${transactionSnapshot.size} transaction deletd in this batch`
+
+        );
+
+        }
+
+        return { 
+            success: true, 
+            msg: "All transactions deleted successfully", 
+        };
+
+       return { success: true, msg: "wallet deleted successfully" };
     } catch (err:any) {
         console.log ('error deleting wallet: ', err);
         return {success: false, msg: err.message}

@@ -89,7 +89,8 @@ const TransactionModal = () => {
     const onSubmit = async ()=>{
    const {type, amount, description, category, date, walletId, image } = transaction;
      if(!walletId || !date || !amount || (type == 'expense' && !category)) {
-      Alert.alert("Transaction", "Please fill all the fields")
+      Alert.alert("Transaction", "Please fill all the fields");
+      return;
      }
 
      console.log("good to go");
@@ -105,7 +106,7 @@ const TransactionModal = () => {
      };
 
      console.log("transaction data: ", transactionData);
-     return;
+    
 
      if(oldTransaction?.id) transactionData.id = oldTransaction.id;
      setLoading(true);
@@ -136,7 +137,7 @@ const TransactionModal = () => {
     };
 
     const showDeleteAlert = ()=>{
-      Alert.alert("Confirm", "Are you sure you want to do this? \nThis action will remove all the transactions related to this wallete",
+      Alert.alert("Confirm", "Are you sure you want to delete this transactions",
       [
         {
           text: "Cancel",

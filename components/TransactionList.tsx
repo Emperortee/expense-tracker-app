@@ -86,7 +86,7 @@ const TransactionItem = ({
     month: "short",
     })
     return (
-        <Animated.View entering={FadeInDown.delay(index = 70)
+        <Animated.View entering={FadeInDown.delay(index * 70)
             .springify()
             .damping(14)
         }>
